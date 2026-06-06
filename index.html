@@ -52,15 +52,16 @@
     @media (max-width: 480px) { .countdown-days { font-size: 26px; } .countdown-block .cb-num { font-size: 15px; } .countdown-block { min-width: 36px; padding: 4px 6px; } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     .screen { animation: fadeIn 0.3s ease; }
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 0.5px solid var(--border); }
-    .logo { display: flex; align-items: center; gap: 10px; }
+    .header { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 0.5px solid var(--border); }
+    .header-top { display: flex; align-items: center; justify-content: space-between; }
+    .header-bottom { display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 8px; }
     .logo i { font-size: 20px; color: var(--green); }
     .logo-title { font-size: 15px; font-weight: 600; color: var(--text); }
-    @media (max-width: 480px) { .logo-title { font-size: 12px; } .logo-sub { font-size: 10px; } .logo i { font-size: 16px; } }
-    .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-    .logo-contact { font-size: 10px; color: var(--text-tertiary); margin-top: 2px; }
-    @media (max-width: 480px) { .logo-contact { display: none; } }
+    @media (max-width: 480px) { .logo-title { font-size: 13px; } .logo i { font-size: 16px; } }
+    .home-link { font-size: 11px; color: var(--text-secondary); text-decoration: none; border: 0.5px solid var(--border); border-radius: 999px; padding: 3px 10px; white-space: nowrap; background: var(--bg-secondary); flex-shrink: 0; }
     .stats-bar { display: flex; gap: 6px; align-items: center; }
+    .action-bar { display: flex; gap: 4px; align-items: center; }
     @media (max-width: 480px) { .stats-bar { gap: 4px; } .stats-bar .stat { font-size: 11px; } .icon-btn { width: 28px; height: 28px; font-size: 14px; } }
     .stat { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
     .stat b { color: var(--text); font-weight: 600; }
@@ -236,20 +237,23 @@
 <body>
 <div id="app">
   <div class="header">
-    <div class="logo">
-      <i class="ti ti-needle"></i>
-      <div>
+    <div class="header-top">
+      <div class="logo">
+        <i class="ti ti-needle"></i>
         <div class="logo-title">鍼灸国家試験過去問</div>
-        <div class="logo-sub">はり師・きゅう師国家試験対策</div>
-        <div class="logo-contact">問い合わせ先：専門学校沖縄統合医療学院 鍼灸学科基幹教員 三橋 光輝</div>
       </div>
+      <a class="home-link" href="https://mitsuhashiocim-prog.github.io/">トップページ</a>
     </div>
-    <div class="stats-bar"><a href="https://mitsuhashiocim-prog.github.io/" style="font-size:11px;color:var(--text-secondary);text-decoration:none;border:0.5px solid var(--border);border-radius:999px;padding:3px 10px;white-space:nowrap;flex-shrink:0;background:var(--bg-secondary);">トップページ</a>
-      <div class="stat"><i class="ti ti-database" style="font-size:15px"></i><b id="hdr-total">0</b>問</div>
-      <div class="stat"><i class="ti ti-check" style="font-size:15px"></i><b id="hdr-rate">―</b></div>
-      <button class="icon-btn" onclick="showGuide()" title="使い方"><i class="ti ti-help"></i></button>
-      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="ダーク/ライト切替"><i class="ti ti-moon"></i></button>
-      <button class="icon-btn" onclick="showChangelog()" title="更新履歴"><i class="ti ti-history"></i></button>
+    <div class="header-bottom">
+      <div class="stats-bar">
+        <div class="stat"><i class="ti ti-database" style="font-size:15px"></i><b id="hdr-total">0</b>問</div>
+        <div class="stat"><i class="ti ti-check" style="font-size:15px"></i><b id="hdr-rate">―</b></div>
+      </div>
+      <div class="action-bar">
+        <button class="icon-btn" onclick="showGuide()" title="使い方"><i class="ti ti-help"></i></button>
+        <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="ダーク/ライト切替"><i class="ti ti-moon"></i></button>
+        <button class="icon-btn" onclick="showChangelog()" title="更新履歴"><i class="ti ti-history"></i></button>
+      </div>
     </div>
   </div>
 
