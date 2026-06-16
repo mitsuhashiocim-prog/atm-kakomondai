@@ -94,8 +94,9 @@
     .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
     .logo-contact { font-size: 10px; color: var(--text-tertiary); margin-top: 2px; }
     @media (max-width: 480px) { .logo-contact { display: none; } }
-    .stats-bar { display: flex; gap: 6px; align-items: center; }
-    @media (max-width: 480px) { .stats-bar { gap: 4px; } .stats-bar .stat { font-size: 11px; } .icon-btn { width: 28px; height: 28px; font-size: 14px; } }
+    .stats-bar { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .stats-bar-row { display: flex; gap: 5px; align-items: center; }
+    @media (max-width: 480px) { .stats-bar .stat { font-size: 11px; } .icon-btn { width: 26px; height: 26px; font-size: 13px; } }
     .stat { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
     .stat b { color: var(--text); font-weight: 600; }
     .info-banner { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 1.25rem; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
@@ -279,12 +280,16 @@
       </div>
     </div>
     <div class="stats-bar">
-      <div class="stat"><i class="ti ti-database" style="font-size:15px"></i><b id="hdr-total">0</b>問</div>
-      <div class="stat"><i class="ti ti-check" style="font-size:15px"></i><b id="hdr-rate">―</b></div>
-      <button class="icon-btn" onclick="showSearchScreen()" title="問題を検索"><i class="ti ti-search"></i></button>
-      <button class="icon-btn" onclick="showGuide()" title="使い方"><i class="ti ti-help"></i></button>
-      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="ダーク/ライト切替"><i class="ti ti-moon"></i></button>
-      <button class="icon-btn" onclick="showChangelog()" title="更新履歴"><i class="ti ti-history"></i></button>
+      <div class="stats-bar-row">
+        <div class="stat"><i class="ti ti-database" style="font-size:14px"></i><b id="hdr-total">0</b>問</div>
+        <div class="stat"><i class="ti ti-check" style="font-size:14px"></i><b id="hdr-rate">―</b></div>
+      </div>
+      <div class="stats-bar-row">
+        <button class="icon-btn" onclick="showSearchScreen()" title="問題を検索"><i class="ti ti-search"></i></button>
+        <button class="icon-btn" onclick="showGuide()" title="使い方"><i class="ti ti-help"></i></button>
+        <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="ダーク/ライト切替"><i class="ti ti-moon"></i></button>
+        <button class="icon-btn" onclick="showChangelog()" title="更新履歴"><i class="ti ti-history"></i></button>
+      </div>
     </div>
   </div>
 
@@ -780,6 +785,7 @@ function init() {
   document.getElementById('num-q').value = defVal;
   document.getElementById('num-q-out').textContent = defVal;
   renderSubjectTags();
+  checkVersionAndShowChangelog();
 }
 
 function makeRoundFolder(labelText, rounds, isExtra) {
@@ -1321,7 +1327,7 @@ function toggleTheme() {
 }
 
 // ===== 更新履歴モーダル =====
-const APP_VERSION = 'v2.5';
+const APP_VERSION = 'v2.5b';
 
 function checkVersionAndShowChangelog() {
   const lastSeen = localStorage.getItem('acupuncture_last_version');
