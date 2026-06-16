@@ -39,6 +39,40 @@
       #app { border-radius: 0; border: none; padding: 1rem; min-height: 100dvh; }
     }
     .hidden { display: none !important; }
+    .search-bar { display: flex; gap: 8px; margin-bottom: 1rem; }
+    .search-input { flex: 1; border: 0.5px solid var(--border-mid); border-radius: var(--radius-md); padding: 10px 14px; font-size: 14px; font-family: inherit; background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
+    .search-input:focus { border-color: var(--green); }
+    .search-input::placeholder { color: var(--text-tertiary); }
+    .btn-search { background: var(--green); color: #fff; border: none; border-radius: var(--radius-md); padding: 10px 16px; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: inherit; font-weight: 600; white-space: nowrap; }
+    .btn-search:hover { opacity: 0.88; }
+    .search-result-meta { font-size: 12px; color: var(--text-tertiary); margin-bottom: 10px; }
+    .search-result-meta b { color: var(--green); }
+    .search-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+    .search-card:hover { border-color: var(--green); background: var(--bg-secondary); }
+    .search-card .sc-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
+    .search-card .sc-subject { font-size: 11px; background: var(--green-light); color: var(--green-mid); padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+    .search-card .sc-round { font-size: 11px; color: var(--text-tertiary); }
+    .search-card .sc-q { font-size: 13px; color: var(--text); line-height: 1.6; font-weight: 500; }
+    .search-card .sc-q mark { background: #fff176; color: #000; border-radius: 2px; padding: 0 2px; }
+    [data-theme="dark"] .search-card .sc-q mark { background: #7c6800; color: #fff; }
+    .search-empty { text-align: center; padding: 2rem; color: var(--text-tertiary); font-size: 13px; }
+    .detail-modal-box { background: var(--bg); border-radius: var(--radius-lg); width: 100%; max-width: 520px; max-height: 88vh; display: flex; flex-direction: column; border: 0.5px solid var(--border); }
+    .detail-q { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.7; padding: 1rem 1.25rem; background: var(--bg-secondary); border-radius: var(--radius-md); margin-bottom: 1rem; }
+    .detail-choices { display: grid; gap: 6px; margin-bottom: 1rem; }
+    .detail-choice { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-md); border: 0.5px solid var(--border); font-size: 13px; }
+    .detail-choice.correct { border-color: var(--green); background: var(--green-light); font-weight: 600; color: var(--green-mid); }
+    .detail-choice .dc-num { width: 22px; height: 22px; border-radius: 50%; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; color: var(--text-secondary); }
+    .detail-choice.correct .dc-num { background: var(--green); color: #fff; }
+    .detail-exp { background: var(--bg-secondary); border-left: 3px solid var(--green); border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 10px 14px; font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 1rem; }
+    .detail-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+    .detail-actions { display: flex; gap: 8px; }
+    .btn-detail-quiz { background: var(--green); color: #fff; border: none; border-radius: var(--radius-md); padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: inherit; flex: 1; justify-content: center; }
+    .btn-detail-quiz:hover { opacity: 0.88; }
+    .btn-detail-bookmark { border: 0.5px solid var(--border-mid); background: transparent; border-radius: var(--radius-md); padding: 10px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: inherit; color: var(--text-secondary); transition: all 0.15s; }
+    .btn-detail-bookmark:hover { background: var(--bg-secondary); }
+    .btn-detail-bookmark.active { background: #fff8e1; border-color: #f5a623; color: #c47d00; }
+    [data-theme="dark"] .btn-detail-bookmark.active { background: #3d2e00; border-color: #f5a623; color: #f5a623; }
+    .search-empty i { font-size: 32px; display: block; margin-bottom: 8px; }
     .countdown-bar { background: linear-gradient(135deg, #1a3a5c, #1D9E75); color: #fff; padding: 10px 16px; border-radius: var(--radius-md); margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .countdown-label { font-size: 11px; opacity: 0.85; white-space: nowrap; }
     .countdown-main { display: flex; align-items: baseline; gap: 4px; }
@@ -247,6 +281,7 @@
     <div class="stats-bar">
       <div class="stat"><i class="ti ti-database" style="font-size:15px"></i><b id="hdr-total">0</b>問</div>
       <div class="stat"><i class="ti ti-check" style="font-size:15px"></i><b id="hdr-rate">―</b></div>
+      <button class="icon-btn" onclick="showSearchScreen()" title="問題を検索"><i class="ti ti-search"></i></button>
       <button class="icon-btn" onclick="showGuide()" title="使い方"><i class="ti ti-help"></i></button>
       <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="ダーク/ライト切替"><i class="ti ti-moon"></i></button>
       <button class="icon-btn" onclick="showChangelog()" title="更新履歴"><i class="ti ti-history"></i></button>
@@ -352,6 +387,20 @@
         次の問題 <i class="ti ti-arrow-right"></i>
       </button>
     </div>
+  </div>
+
+  <!-- 検索画面 -->
+  <div id="screen-search" class="screen hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <div style="font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;"><i class="ti ti-search" style="color:var(--green)"></i>問題を検索</div>
+      <button class="btn-home-sm" onclick="showHome()"><i class="ti ti-arrow-left"></i>戻る</button>
+    </div>
+    <div class="search-bar">
+      <input class="search-input" id="search-input" type="text" placeholder="キーワードを入力（例：合谷、経絡、熱証）" oninput="onSearchInput()">
+      <button class="btn-search" onclick="doSearch()"><i class="ti ti-search"></i>検索</button>
+    </div>
+    <div id="search-result-meta" class="search-result-meta hidden"></div>
+    <div id="search-results"></div>
   </div>
 
   <!-- 保存した問題画面 -->
@@ -460,17 +509,20 @@
       </div>
 
       <div class="guide-section">
-        <div class="guide-section-title">解答画面のボタン配置</div>
+        <div class="guide-section-title">キーワード検索</div>
         <div class="guide-step">
-          <div class="guide-step-num">↩</div>
+          <div class="guide-step-num"><i class="ti ti-search" style="font-size:13px;"></i></div>
           <div class="guide-step-body">
-            <div class="guide-step-title"><i class="ti ti-layout-bottombar"></i>ボタンの配置</div>
-            <div class="guide-step-desc">
-              解答後のボタン配置は以下の通りです。<br>
-              上段左：<span class="guide-badge gray">← 前へ</span>（2問目以降に表示）<br>
-              上段右：<span class="guide-badge gray">🔖 保存</span> <span class="guide-badge gray">🏠 ホーム</span><br>
-              下段：<span class="guide-badge green">次の問題 →</span>（横幅いっぱい・押しやすい）
-            </div>
+            <div class="guide-step-title"><i class="ti ti-search"></i>問題を検索する</div>
+            <div class="guide-step-desc">ヘッダー右上の🔍アイコンから検索画面へ移動できます。キーワードを入力すると問題文・選択肢・解説・科目名を横断検索します。スペース区切りでAND検索が可能です（例：「合谷 経絡」）。</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num"><i class="ti ti-list" style="font-size:13px;"></i></div>
+          <div class="guide-step-body">
+            <div class="guide-step-title"><i class="ti ti-layout-list"></i>検索結果の表示</div>
+            <div class="guide-step-desc">検索結果は国家試験の科目順・回次順で表示されます。問題カードをタップすると詳細モーダルが開き、正解・解説の確認、メモの入力・保存、問題の保存（ブックマーク）ができます。</div>
+            <div class="guide-tip"><i class="ti ti-bulb"></i>「検索結果をすべて演習」ボタンで該当する問題をまとめて演習できます。</div>
           </div>
         </div>
       </div>
@@ -510,6 +562,39 @@
   </div>
 </div>
 
+<!-- 問題詳細モーダル -->
+<div id="modal-detail" class="modal-overlay hidden" onclick="closeDetail()">
+  <div class="detail-modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title" id="detail-title-meta"></span>
+      <button class="icon-btn" onclick="closeDetail()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-meta" id="detail-meta"></div>
+      <div class="detail-q" id="detail-q"></div>
+      <div class="detail-choices" id="detail-choices"></div>
+      <div id="detail-exp"></div>
+      <div style="margin-bottom:1rem;">
+        <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;display:flex;align-items:center;gap:6px;"><i class="ti ti-pencil" style="color:var(--green)"></i>自分のメモ・解説</div>
+        <textarea class="explanation-textarea" id="detail-textarea" placeholder="メモや解説をここに入力..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="btn-exp-save" onclick="saveDetailNote()"><i class="ti ti-device-floppy"></i>保存</button>
+          <button class="btn-exp-clear" onclick="clearDetailNote()">削除</button>
+          <span class="exp-saved-badge hidden" id="detail-saved-badge" style="margin-left:4px;"><i class="ti ti-check"></i>保存済み</span>
+        </div>
+      </div>
+      <div class="detail-actions">
+        <button class="btn-detail-bookmark" id="detail-bookmark-btn" onclick="toggleDetailBookmark()">
+          <i class="ti ti-bookmark"></i>保存
+        </button>
+        <button class="btn-detail-quiz" onclick="startFromDetail()">
+          <i class="ti ti-player-play"></i>この問題から演習
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- 更新履歴モーダル -->
 <div id="modal-overlay" class="modal-overlay hidden" onclick="closeChangelog()">
   <div class="modal-box" onclick="event.stopPropagation()">
@@ -518,6 +603,16 @@
       <button class="icon-btn" onclick="closeChangelog()"><i class="ti ti-x"></i></button>
     </div>
     <div class="modal-body">
+      <div class="changelog-item">
+        <div class="changelog-version">v2.5 <span>2025年</span></div>
+        <ul>
+          <li>キーワード検索機能を追加（🔍アイコンから利用可能）</li>
+          <li>検索結果を国家試験科目順・回次順・科目グループで表示</li>
+          <li>検索結果の問題詳細モーダルを追加（正解・解説を確認可能）</li>
+          <li>詳細モーダルからメモの入力・保存・ブックマークが可能に</li>
+          <li>使い方ガイドに検索機能の説明を追加</li>
+        </ul>
+      </div>
       <div class="changelog-item">
         <div class="changelog-version">v2.4 <span>2025年</span></div>
         <ul>
@@ -933,6 +1028,278 @@ function updateCountdown() {
 
 setInterval(updateCountdown, 1000 * 60 * 60);  // 1時間ごとに更新
 
+
+// ===== キーワード検索 =====
+function showSearchScreen() {
+  showScreen('search');
+  setTimeout(() => document.getElementById('search-input').focus(), 100);
+}
+
+function onSearchInput() {
+  const val = document.getElementById('search-input').value.trim();
+  if (val.length >= 2) doSearch();
+  if (val.length === 0) {
+    document.getElementById('search-results').innerHTML = '';
+    document.getElementById('search-result-meta').classList.add('hidden');
+  }
+}
+
+
+const SUBJECT_ORDER = [
+  '医療概論','衛生学・公衆衛生学','関係法規','解剖学','生理学',
+  '病理学概論','臨床医学総論','臨床医学各論','リハビリテーション医学',
+  '東洋医学概論','経絡経穴概論','東洋医学臨床論','はり理論','きゅう理論'
+];
+function doSearch() {
+  const raw = document.getElementById('search-input').value.trim();
+  if (!raw) return;
+
+  // スペース区切りでAND検索
+  const keywords = raw.split(/\s+/).filter(k => k.length > 0);
+
+  // メイン＋extraを対象に検索
+  const allQ = [...questions, ...extraQuestions];
+  const filtered = allQ.filter(q => {
+    const text = q.subject + q.q + q.choices.join('') + q.exp;
+    return keywords.every(kw => text.includes(kw));
+  });
+
+  // 科目順→回次順でソート
+  const results = filtered.sort((a, b) => {
+    const ai = SUBJECT_ORDER.indexOf(a.subject);
+    const bi = SUBJECT_ORDER.indexOf(b.subject);
+    const aOrder = ai === -1 ? 99 : ai;
+    const bOrder = bi === -1 ? 99 : bi;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return Number(a.round || 0) - Number(b.round || 0);
+  });
+
+  const meta = document.getElementById('search-result-meta');
+  const container = document.getElementById('search-results');
+
+  if (results.length === 0) {
+    meta.classList.add('hidden');
+    container.innerHTML = '<div class="search-empty"><i class="ti ti-zoom-question"></i>「' + raw + '」に一致する問題が見つかりませんでした。</div>';
+    return;
+  }
+
+  meta.innerHTML = '<b>' + results.length + '問</b> 見つかりました（タップで演習）';
+  meta.classList.remove('hidden');
+
+  // ハイライト用正規表現
+  const escapedKw = keywords.map(k => k.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'));
+  const regex = new RegExp('(' + escapedKw.join('|') + ')', 'g');
+
+  currentSearchResults = results;
+  let html2 = '';
+  let lastSubject = null;
+  const limit = Math.min(results.length, 200);
+  for (let qi = 0; qi < limit; qi++) {
+    const q = results[qi];
+    // 科目ヘッダー
+    if (q.subject !== lastSubject) {
+      const cnt = results.filter(r => r.subject === q.subject).length;
+      html2 += `<div style="font-size:11px;font-weight:700;color:var(--text-tertiary);padding:10px 4px 4px;border-bottom:0.5px solid var(--border);margin-bottom:6px;">${q.subject} <span style="font-weight:400;">${cnt}問</span></div>`;
+      lastSubject = q.subject;
+    }
+    const highlightedQ = q.q.replace(regex, '<mark>$1</mark>');
+    html2 += `<div class="search-card" onclick="showDetail(${qi})">
+      <div class="sc-meta">
+        <span class="sc-round">${q.round ? '第' + q.round + '回' : ''}</span>
+      </div>
+      <div class="sc-q">${highlightedQ}</div>
+    </div>`;
+  }
+
+  if (results.length > 200) {
+    html2 += `<div style="text-align:center;font-size:12px;color:var(--text-tertiary);padding:12px;">200件以上のため最初の200件を表示しています</div>`;
+  }
+
+  // 全件演習ボタン
+  html2 = `<div style="margin-bottom:10px;"><button class="btn-bookmark-mode" onclick="startAllSearchQuiz()"><i class="ti ti-player-play"></i>検索結果 ${results.length}問 をすべて演習</button></div>` + html2;
+
+  container.innerHTML = html2;
+}
+
+function getSearchResults(raw) {
+  const keywords = raw.split(/\s+/).filter(k => k.length > 0);
+  const allQ = [...questions, ...extraQuestions];
+  const filtered = allQ.filter(q => {
+    const text = q.subject + q.q + q.choices.join('') + q.exp;
+    return keywords.every(kw => text.includes(kw));
+  });
+  return filtered.sort((a, b) => {
+    const ai = SUBJECT_ORDER.indexOf(a.subject);
+    const bi = SUBJECT_ORDER.indexOf(b.subject);
+    const aOrder = ai === -1 ? 99 : ai;
+    const bOrder = bi === -1 ? 99 : bi;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return Number(a.round || 0) - Number(b.round || 0);
+  });
+}
+
+function startAllSearchQuiz() {
+  const results = currentSearchResults;
+  if (!results.length) return;
+  quizSet = [...results].sort(() => Math.random() - 0.5);
+  current = 0; correct = 0; startTime = Date.now();
+  answerHistory = {}; shuffleHistory = {};
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function startSearchQuiz(idx, raw) {
+  const results = getSearchResults(raw);
+  if (!results.length) return;
+  // クリックした問題を先頭にして残りをランダム
+  const clicked = results[idx];
+  const rest = results.filter((_, i) => i !== idx).sort(() => Math.random() - 0.5);
+  quizSet = [clicked, ...rest];
+  current = 0; correct = 0; startTime = Date.now();
+  answerHistory = {}; shuffleHistory = {};
+  showScreen('quiz');
+  renderQuestion();
+}
+
+
+// ===== 問題詳細モーダル =====
+let detailQ = null;
+let detailSearchRaw = '';
+let detailSearchIdx = 0;
+let currentSearchResults = [];
+
+function showDetail(idx) {
+  const results = currentSearchResults;
+  const q = results[idx];
+  if (!q) return;
+  detailQ = q;
+  detailSearchIdx = idx;
+
+  // タイトル
+  document.getElementById('detail-title-meta').innerHTML =
+    `<span style="font-size:12px;background:var(--green-light);color:var(--green-mid);padding:2px 10px;border-radius:999px;font-weight:600;">${q.subject}</span>`;
+
+  // メタ
+  document.getElementById('detail-meta').innerHTML =
+    (q.round ? `<span style="font-size:12px;color:var(--text-tertiary);">第${q.round}回</span>` : '') +
+    (getRate(q) !== null ? `<span class="difficulty">${getDifficultyStars(q)}</span><span style="font-size:11px;color:var(--text-tertiary);">正解率 ${Math.round(getRate(q)*100)}%</span>` : '');
+
+  // 問題文
+  document.getElementById('detail-q').textContent = q.q;
+
+  // 選択肢（正解を表示）
+  const labels = ['1','2','3','4'];
+  let choicesHtml = '';
+  q.choices.forEach((c, i) => {
+    const isCorrect = i === q.ans;
+    choicesHtml += `<div class="detail-choice ${isCorrect ? 'correct' : ''}">
+      <span class="dc-num">${labels[i]}</span>${c}
+      ${isCorrect ? '<i class="ti ti-check" style="margin-left:auto;"></i>' : ''}
+    </div>`;
+  });
+  document.getElementById('detail-choices').innerHTML = choicesHtml;
+
+  // 解説
+  const key = getNoteKey(q);
+  const exp = userNotes[key] || q.exp || '';
+  document.getElementById('detail-exp').innerHTML = exp
+    ? `<div class="detail-exp">${exp}</div>` : '';
+
+  // 保存ボタン状態
+  updateDetailBookmarkBtn();
+
+  // メモ欄を初期化
+  const noteKey = getNoteKey(q);
+  const existingNote = userNotes[noteKey] || '';
+  document.getElementById('detail-textarea').value = existingNote;
+  const badge = document.getElementById('detail-saved-badge');
+  if (existingNote) badge.classList.remove('hidden');
+  else badge.classList.add('hidden');
+
+  document.getElementById('modal-detail').classList.remove('hidden');
+}
+
+function saveDetailNote() {
+  if (!detailQ) return;
+  const key = getNoteKey(detailQ);
+  const note = document.getElementById('detail-textarea').value.trim();
+  if (note) {
+    userNotes[key] = note;
+  } else {
+    delete userNotes[key];
+  }
+  saveUserNotes();
+  const badge = document.getElementById('detail-saved-badge');
+  if (note) badge.classList.remove('hidden');
+  else badge.classList.add('hidden');
+  // 解説表示も更新
+  const exp = note || detailQ.exp || '';
+  document.getElementById('detail-exp').innerHTML = exp
+    ? `<div class="detail-exp">${exp}</div>` : '';
+}
+
+function clearDetailNote() {
+  if (!detailQ) return;
+  if (!confirm('このメモを削除しますか？')) return;
+  const key = getNoteKey(detailQ);
+  delete userNotes[key];
+  saveUserNotes();
+  document.getElementById('detail-textarea').value = '';
+  document.getElementById('detail-saved-badge').classList.add('hidden');
+  document.getElementById('detail-exp').innerHTML = detailQ.exp
+    ? `<div class="detail-exp">${detailQ.exp}</div>` : '';
+}
+
+function getDifficultyStars(q) {
+  const rate = getRate(q);
+  if (rate === null) return '';
+  if (rate >= 0.8) return '★<span class="empty">★★</span>';
+  if (rate >= 0.5) return '★★<span class="empty">★</span>';
+  return '★★★';
+}
+
+function closeDetail() {
+  document.getElementById('modal-detail').classList.add('hidden');
+}
+
+function updateDetailBookmarkBtn() {
+  if (!detailQ) return;
+  const key = getBookmarkKey(detailQ);
+  const btn = document.getElementById('detail-bookmark-btn');
+  if (bookmarks[key]) {
+    btn.classList.add('active');
+    btn.innerHTML = '<i class="ti ti-bookmark-filled"></i>保存済み';
+  } else {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="ti ti-bookmark"></i>保存';
+  }
+}
+
+function toggleDetailBookmark() {
+  if (!detailQ) return;
+  const key = getBookmarkKey(detailQ);
+  if (bookmarks[key]) {
+    delete bookmarks[key];
+  } else {
+    bookmarks[key] = { subject: detailQ.subject, q: detailQ.q, choices: detailQ.choices, ans: detailQ.ans, exp: detailQ.exp, round: detailQ.round };
+  }
+  saveBookmarks();
+  updateDetailBookmarkBtn();
+  updateBookmarkDesc();
+}
+
+function startFromDetail() {
+  if (!detailQ) return;
+  const results = currentSearchResults;
+  const rest = results.filter((_, i) => i !== detailSearchIdx).sort(() => Math.random() - 0.5);
+  quizSet = [detailQ, ...rest];
+  current = 0; correct = 0; startTime = Date.now();
+  answerHistory = {}; shuffleHistory = {};
+  closeDetail();
+  showScreen('quiz');
+  renderQuestion();
+}
+
 // ===== テーマ切替 =====
 function initTheme() {
   const saved = localStorage.getItem('acupuncture_theme');
@@ -954,6 +1321,17 @@ function toggleTheme() {
 }
 
 // ===== 更新履歴モーダル =====
+const APP_VERSION = 'v2.5';
+
+function checkVersionAndShowChangelog() {
+  const lastSeen = localStorage.getItem('acupuncture_last_version');
+  if (lastSeen !== APP_VERSION) {
+    localStorage.setItem('acupuncture_last_version', APP_VERSION);
+    // 少し遅らせてアプリ描画後に表示
+    setTimeout(() => showChangelog(true), 600);
+  }
+}
+
 function showGuide() {
   document.getElementById('modal-guide').classList.remove('hidden');
 }
@@ -961,13 +1339,20 @@ function closeGuide() {
   document.getElementById('modal-guide').classList.add('hidden');
 }
 
-function showChangelog() {
-  document.getElementById('modal-overlay').classList.remove('hidden');
+function showChangelog(isAuto) {
+  const modal = document.getElementById('modal-overlay');
+  modal.classList.remove('hidden');
+  // 自動表示時は最新バージョンをハイライト
+  const latest = modal.querySelector('.changelog-version');
+  if (isAuto && latest) {
+    latest.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    latest.style.animation = 'fadeIn 0.5s ease';
+  }
 }
 function closeChangelog() {
   document.getElementById('modal-overlay').classList.add('hidden');
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeChangelog(); closeGuide(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeChangelog(); closeGuide(); closeDetail(); } if (e.key === 'Enter' && document.getElementById('screen-search') && !document.getElementById('screen-search').classList.contains('hidden')) { doSearch(); } });
 
 
 // ===== 自分の解説メモ =====
@@ -1325,7 +1710,7 @@ function confirmHome() {
 function showHome() { showScreen('home'); }
 
 function showScreen(name) {
-  ['home','quiz','result','bookmark'].forEach(s => document.getElementById('screen-' + s).classList.add('hidden'));
+  ['home','quiz','result','bookmark','search'].forEach(s => document.getElementById('screen-' + s).classList.add('hidden'));
   document.getElementById('screen-' + name).classList.remove('hidden');
 }
 
