@@ -73,6 +73,15 @@
     .btn-detail-bookmark.active { background: #fff8e1; border-color: #f5a623; color: #c47d00; }
     [data-theme="dark"] .btn-detail-bookmark.active { background: #3d2e00; border-color: #f5a623; color: #f5a623; }
     .search-empty i { font-size: 32px; display: block; margin-bottom: 8px; }
+    .resume-banner { background: linear-gradient(135deg, #1a3a5c, #7c3aed); color: #fff; border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .resume-banner-info { flex: 1; }
+    .resume-banner-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+    .resume-banner-meta { font-size: 11px; opacity: 0.8; }
+    .resume-banner-btns { display: flex; gap: 6px; flex-shrink: 0; }
+    .btn-resume { background: #fff; color: #1a3a5c; border: none; border-radius: var(--radius-md); padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
+    .btn-resume:hover { opacity: 0.88; }
+    .btn-resume-discard { background: rgba(255,255,255,0.2); color: #fff; border: none; border-radius: var(--radius-md); padding: 7px 10px; font-size: 12px; cursor: pointer; font-family: inherit; }
+    .btn-resume-discard:hover { background: rgba(255,255,255,0.3); }
     .countdown-bar { background: linear-gradient(135deg, #1a3a5c, #1D9E75); color: #fff; padding: 10px 16px; border-radius: var(--radius-md); margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .countdown-label { font-size: 11px; opacity: 0.85; white-space: nowrap; }
     .countdown-main { display: flex; align-items: baseline; gap: 4px; }
@@ -294,6 +303,16 @@
   </div>
 
   <div id="screen-home" class="screen">
+    <div id="resume-banner" class="resume-banner hidden">
+      <div class="resume-banner-info">
+        <div class="resume-banner-title"><i class="ti ti-player-pause"></i>中断中の演習があります</div>
+        <div class="resume-banner-meta" id="resume-meta"></div>
+      </div>
+      <div class="resume-banner-btns">
+        <button class="btn-resume" onclick="resumeQuiz()"><i class="ti ti-player-play"></i> 再開</button>
+        <button class="btn-resume-discard" onclick="discardResume()" title="削除"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>
     <div class="countdown-bar" id="countdown-bar">
       <div class="countdown-label">🩺 はり師・きゅう師 国家試験まで</div>
       <div class="countdown-main">
@@ -533,6 +552,25 @@
       </div>
 
       <div class="guide-section">
+        <div class="guide-section-title">中断・再開</div>
+        <div class="guide-step">
+          <div class="guide-step-num"><i class="ti ti-player-pause" style="font-size:13px;"></i></div>
+          <div class="guide-step-body">
+            <div class="guide-step-title"><i class="ti ti-player-pause"></i>演習を中断する</div>
+            <div class="guide-step-desc">演習中に「ホームへ戻る」をタップすると進捗が自動保存されます。ホーム画面に「中断中の演習があります」バナーが表示されます。</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num"><i class="ti ti-player-play" style="font-size:13px;"></i></div>
+          <div class="guide-step-body">
+            <div class="guide-step-title"><i class="ti ti-player-play"></i>演習を再開する</div>
+            <div class="guide-step-desc">バナーの「▶ 再開」ボタンをタップすると中断した問題から続きを解けます。解答済みの問題も正しく復元されます。🗑️ボタンで進捗を削除できます。</div>
+            <div class="guide-tip"><i class="ti ti-bulb"></i>新しく演習を開始すると前の進捗は自動でクリアされます。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-section">
         <div class="guide-section-title">便利な機能</div>
         <div class="guide-step">
           <div class="guide-step-num">⭐</div>
@@ -609,7 +647,15 @@
     </div>
     <div class="modal-body">
       <div class="changelog-item">
-        <div class="changelog-version">v2.6 <span>2025年</span></div>
+        <div class="changelog-version">v2.7 <span>2026年</span></div>
+        <ul>
+          <li>演習中断・再開機能を追加</li>
+          <li>中断時に進捗を自動保存、ホーム画面に再開バナーを表示</li>
+          <li>使い方ガイドに中断・再開の説明を追加</li>
+        </ul>
+      </div>
+      <div class="changelog-item">
+        <div class="changelog-version">v2.6 <span>2026年</span></div>
         <ul>
           <li>問題データを更新（分数表記の誤変換を修正：「1/4」が「1月4日」になっていた問題など）</li>
           <li>更新履歴がログイン時に正しく自動表示されるよう修正</li>
@@ -617,7 +663,7 @@
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v2.5 <span>2025年</span></div>
+        <div class="changelog-version">v2.5 <span>2026年</span></div>
         <ul>
           <li>キーワード検索機能を追加（🔍アイコンから利用可能）</li>
           <li>検索結果を国家試験科目順・回次順・科目グループで表示</li>
@@ -627,14 +673,14 @@
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v2.4 <span>2025年</span></div>
+        <div class="changelog-version">v2.4 <span>2026年</span></div>
         <ul>
           <li>問題データを更新（第32回 透熱灸に関する問題の正解誤りを修正）</li>
           <li>重複していた問題データを解消（1677問→1676問）</li>
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v2.3 <span>2025年</span></div>
+        <div class="changelog-version">v2.3 <span>2026年</span></div>
         <ul>
           <li>解答中に「前の問題へ戻る」ボタンを追加</li>
           <li>ボタン配置をC案レイアウトに変更（次の問題をフル幅・前へを左端）</li>
@@ -643,14 +689,14 @@
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v2.2 <span>2025年</span></div>
+        <div class="changelog-version">v2.2 <span>2026年</span></div>
         <ul>
           <li>使い方ガイドを追加（ヘッダーの？アイコンから確認可能）</li>
           <li>データ消去に関する注意書きをガイドに追記</li>
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v2.1 <span>2025年</span></div>
+        <div class="changelog-version">v2.1 <span>2026年</span></div>
         <ul>
           <li>国家試験までのカウントダウン（残り日数）をホーム上部に表示</li>
           <li>保存した問題をフォルダー式（科目別・折りたたみ）に変更</li>
@@ -659,7 +705,7 @@
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v2.0 <span>2025年</span></div>
+        <div class="changelog-version">v2.0 <span>2026年</span></div>
         <ul>
           <li>自分のメモ・解説を入力・保存できる機能を追加</li>
           <li>ユーザーメモはCSVの解説より優先表示</li>
@@ -668,7 +714,7 @@
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v1.9 <span>2025年</span></div>
+        <div class="changelog-version">v1.9 <span>2026年</span></div>
         <ul>
           <li>自分のメモ・解説を入力・保存できる機能を追加</li>
           <li>ユーザーメモはCSVの解説より優先表示</li>
@@ -676,7 +722,7 @@
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v1.8 <span>2025年</span></div>
+        <div class="changelog-version">v1.8 <span>2026年</span></div>
         <ul>
           <li>アプリタイトルを「鍼灸国家試験過去問」に変更</li>
           <li>第1〜24回の問題を追加（回次別モード専用）</li>
@@ -688,13 +734,13 @@
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v1.7 <span>2025年</span></div>
+        <div class="changelog-version">v1.7 <span>2026年</span></div>
         <ul>
           <li>「栞」機能を「問題の保存」に名称変更</li>
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v1.6 <span>2025年</span></div>
+        <div class="changelog-version">v1.6 <span>2026年</span></div>
         <ul>
           <li>回次別モードを追加（タップでその回の全問をCSV順で出題）</li>
           <li>本番モード・苦手問題・保存した問題ボタンを横並びに変更</li>
@@ -702,7 +748,7 @@
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v1.5 <span>2025年</span></div>
+        <div class="changelog-version">v1.5 <span>2026年</span></div>
         <ul>
           <li>問題の保存機能を追加（演習中に気になった問題を保存）</li>
           <li>保存した問題の一覧表示・復習・演習に対応</li>
@@ -710,14 +756,14 @@
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v1.4 <span>2025年</span></div>
+        <div class="changelog-version">v1.4 <span>2026年</span></div>
         <ul>
           <li>ダークモード／ライトモード切替を追加</li>
           <li>更新履歴ページを追加</li>
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v1.3 <span>2025年</span></div>
+        <div class="changelog-version">v1.3 <span>2026年</span></div>
         <ul>
           <li>問題ごとの正答率統計をブラウザに保存</li>
           <li>★による難易度表示を追加</li>
@@ -726,7 +772,7 @@
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v1.2 <span>2025年</span></div>
+        <div class="changelog-version">v1.2 <span>2026年</span></div>
         <ul>
           <li>出題回次（第25〜34回）フィルター機能を追加</li>
           <li>問題画面に出題回次を表示</li>
@@ -734,7 +780,7 @@
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v1.1 <span>2025年</span></div>
+        <div class="changelog-version">v1.1 <span>2026年</span></div>
         <ul>
           <li>本番モード（180問・国試配分）を追加</li>
           <li>演習終了後にかかった時間を表示</li>
@@ -743,7 +789,7 @@
         </ul>
       </div>
       <div class="changelog-item">
-        <div class="changelog-version">v1.0 <span>2025年</span></div>
+        <div class="changelog-version">v1.0 <span>2026年</span></div>
         <ul>
           <li>初リリース</li>
           <li>CSVアップロード・科目別ランダム出題</li>
@@ -793,6 +839,7 @@ function init() {
   document.getElementById('num-q').value = defVal;
   document.getElementById('num-q-out').textContent = defVal;
   renderSubjectTags();
+  checkResume();
   checkVersionAndShowChangelog();
 }
 
@@ -1012,7 +1059,7 @@ function startBookmarkQuiz() {
     const b = bookmarks[k];
     return { subject: b.subject, q: b.q, choices: b.choices, ans: b.ans, exp: b.exp, round: b.round || '' };
   }).sort(() => Math.random() - 0.5);
-  current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={};
+  current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={}; clearResume();
   showScreen('quiz');
   renderQuestion();
 }
@@ -1020,7 +1067,7 @@ function startBookmarkQuiz() {
 function reviewBookmark(key) {
   const b = bookmarks[key];
   quizSet = [{ subject: b.subject, q: b.q, choices: b.choices, ans: b.ans, exp: b.exp, round: b.round || '' }];
-  current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={};
+  current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={}; clearResume();
   showScreen('quiz');
   renderQuestion();
 }
@@ -1314,6 +1361,73 @@ function startFromDetail() {
   renderQuestion();
 }
 
+
+// ===== 中断・再開 =====
+const RESUME_KEY = 'acupuncture_resume';
+
+function saveProgress() {
+  if (!quizSet.length) return;
+  const data = {
+    quizSet: quizSet,
+    current: current,
+    correct: correct,
+    startTime: startTime,
+    answerHistory: answerHistory,
+    shuffleHistory: shuffleHistory,
+    savedAt: Date.now()
+  };
+  try { localStorage.setItem(RESUME_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function loadResume() {
+  try {
+    const raw = localStorage.getItem(RESUME_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function clearResume() {
+  localStorage.removeItem(RESUME_KEY);
+}
+
+function checkResume() {
+  const data = loadResume();
+  const banner = document.getElementById('resume-banner');
+  if (!data || !data.quizSet || !data.quizSet.length) {
+    banner.classList.add('hidden');
+    return;
+  }
+  const remaining = data.quizSet.length - data.current;
+  const elapsed = Math.floor((Date.now() - data.savedAt) / 60000);
+  const timeStr = elapsed < 60 ? elapsed + '分前' : Math.floor(elapsed/60) + '時間前';
+  document.getElementById('resume-meta').textContent =
+    `${data.quizSet[0].subject}ほか / 残り${remaining}問 / ${timeStr}に中断`;
+  banner.classList.remove('hidden');
+}
+
+function resumeQuiz() {
+  const data = loadResume();
+  if (!data) return;
+  quizSet = data.quizSet;
+  current = data.current;
+  correct = data.correct;
+  startTime = data.startTime || Date.now();
+  answerHistory = data.answerHistory || {};
+  shuffleHistory = data.shuffleHistory || {};
+  document.getElementById('resume-banner').classList.add('hidden');
+  showScreen('quiz');
+  renderQuestion();
+  if (answerHistory[current] !== undefined) {
+    restoreAnswer(current);
+  }
+}
+
+function discardResume() {
+  if (!confirm('中断中の演習を削除しますか？')) return;
+  clearResume();
+  document.getElementById('resume-banner').classList.add('hidden');
+}
+
 // ===== テーマ切替 =====
 function initTheme() {
   const saved = localStorage.getItem('acupuncture_theme');
@@ -1335,7 +1449,7 @@ function toggleTheme() {
 }
 
 // ===== 更新履歴モーダル =====
-const APP_VERSION = 'v2.6';
+const APP_VERSION = 'v2.7';
 
 function checkVersionAndShowChangelog() {
   const lastSeen = localStorage.getItem('acupuncture_last_version');
@@ -1538,7 +1652,7 @@ function startWeakMode() {
   });
   if (weak.length === 0) { alert('まだ苦手問題がありません。\n演習を重ねると自動的に抽出されます。'); return; }
   quizSet = [...weak].sort(() => Math.random() - 0.5);
-  current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={};
+  current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={}; clearResume();
   showScreen('quiz');
   renderQuestion();
 }
@@ -1549,7 +1663,7 @@ function startRoundMode(round, isExtra) {
   const pool = src.filter(q => q.round === round);
   if (!pool.length) { alert('該当する問題が見つかりません。'); return; }
   quizSet = pool; // CSV順をそのまま使用・シャッフルなし
-  current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={};
+  current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={}; clearResume();
   showScreen('quiz');
   renderQuestion();
 }
@@ -1579,7 +1693,7 @@ function startExamMode() {
   }
   if (!pool.length) { alert('問題データが不足しています。'); return; }
   quizSet = pool; // 科目順を維持（シャッフルしない）
-  current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={};
+  current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={}; clearResume();
   showScreen('quiz');
   renderQuestion();
 }
@@ -1589,7 +1703,7 @@ function startQuiz() {
   if (!pool.length) { alert('科目を選択してください。'); return; }
   const n = parseInt(document.getElementById('num-q').value);
   quizSet = [...pool].sort(() => Math.random() - 0.5).slice(0, Math.min(n, pool.length));
-  current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={};
+  current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={}; clearResume();
   showScreen('quiz');
   renderQuestion();
 }
@@ -1718,7 +1832,11 @@ function showResult() {
 }
 
 function confirmHome() {
-  if (confirm('演習を中断してホームへ戻りますか？')) { showHome(); }
+  if (confirm('演習を中断してホームへ戻りますか？\n※進捗を保存して後で再開できます。')) {
+    saveProgress();
+    showHome();
+    checkResume();
+  }
 }
 
 function showHome() { showScreen('home'); }
