@@ -400,7 +400,7 @@
       <button class="btn-home-sm" onclick="showHome()"><i class="ti ti-arrow-left"></i>戻る</button>
     </div>
     <div class="search-bar">
-      <input class="search-input" id="search-input" type="text" placeholder="キーワードを入力（例：合谷、経絡、熱証）" oninput="onSearchInput()">
+      <input class="search-input" id="search-input" type="text" placeholder="キーワードを入力（例：合谷、経絡、熱証）" id="search-input-field">
       <button class="btn-search" onclick="doSearch()"><i class="ti ti-search"></i>検索</button>
     </div>
     <div id="search-result-meta" class="search-result-meta hidden"></div>
@@ -814,6 +814,7 @@ function init() {
   renderSubjectTags();
   checkResume();
   checkVersionAndShowChangelog();
+  setTimeout(initSearchInput, 100);
 }
 
 function makeRoundFolder(labelText, rounds, isExtra) {
@@ -1055,12 +1056,34 @@ setInterval(updateCountdown, 1000 * 60 * 60);  // 1時間ごとに更新
 // ===== キーワード検索 =====
 function showSearchScreen() {
   showScreen('search');
-  setTimeout(() => document.getElementById('search-input').focus(), 100);
+  setTimeout(() => {
+    initSearchInput();
+    document.getElementById('search-input').focus();
+  }, 100);
+}
+
+// IME変換中フラグ
+let isComposing = false;
+
+function initSearchInput() {
+  const input = document.getElementById('search-input');
+  if (!input) return;
+  // IME変換開始
+  input.addEventListener('compositionstart', () => { isComposing = true; });
+  // IME変換確定
+  input.addEventListener('compositionend', () => {
+    isComposing = false;
+    onSearchInput();
+  });
+  // 通常入力（英数字など）
+  input.addEventListener('input', () => {
+    if (!isComposing) onSearchInput();
+  });
 }
 
 function onSearchInput() {
   const val = document.getElementById('search-input').value.trim();
-  if (val.length >= 2) doSearch();
+  if (val.length >= 1) doSearch();
   if (val.length === 0) {
     document.getElementById('search-results').innerHTML = '';
     document.getElementById('search-result-meta').classList.add('hidden');
@@ -1117,7 +1140,7 @@ function doSearch() {
 
   if (results.length === 0) {
     meta.classList.add('hidden');
-    container.innerHTML = '<div class="search-empty"><i class="ti ti-zoom-question"></i>「' + raw + '」に一致する問題が見つかりませんでした。</div>';
+    container.innerHTML = '<div class="search-empty"><i class="ti ti-zoom-question"></i>「' + raw + '」に一致する問題が見つかりませんでした。<br><span style="font-size:11px;color:var(--text-tertiary);margin-top:8px;display:block;">※ 漢字・カタカナ・ひらがなで検索してみてください</span></div>';
     return;
   }
 
@@ -1133,7 +1156,7 @@ function doSearch() {
   // 科目ごとにグループ化
   const groupMap = {};
   const groupOrder = [];
-  for (let qi = 0; qi < Math.min(results.length, 200); qi++) {
+  for (let qi = 0; qi < results.length; qi++) {
     const q = results[qi];
     if (!groupMap[q.subject]) { groupMap[q.subject] = []; groupOrder.push(q.subject); }
     groupMap[q.subject].push({ q, qi });
@@ -1164,9 +1187,6 @@ function doSearch() {
     html2 += '</div>';
   }
 
-  if (results.length > 200) {
-    html2 += `<div style="text-align:center;font-size:12px;color:var(--text-tertiary);padding:12px;">200件以上のため最初の200件を表示しています（科目別アコーディオン）</div>`;
-  }
 
   // 全件演習ボタン
   html2 = `<div style="margin-bottom:10px;"><button class="btn-bookmark-mode" onclick="startAllSearchQuiz()"><i class="ti ti-player-play"></i>検索結果 ${results.length}問 をすべて演習</button></div>` + html2;
@@ -1482,7 +1502,7 @@ function showChangelog(isAuto) {
 function closeChangelog() {
   document.getElementById('modal-overlay').classList.add('hidden');
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeChangelog(); closeGuide(); closeDetail(); } if (e.key === 'Enter' && document.getElementById('screen-search') && !document.getElementById('screen-search').classList.contains('hidden')) { doSearch(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeChangelog(); closeGuide(); closeDetail(); } if (e.key === 'Enter' && !isComposing && document.getElementById('screen-search') && !document.getElementById('screen-search').classList.contains('hidden')) { doSearch(); } });
 
 // ===== 自分の解説メモ =====
 let userNotes = {};
