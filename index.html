@@ -265,6 +265,23 @@
     .btn-detail-bookmark:hover { background: var(--bg-secondary); }
     .btn-detail-bookmark.active { background: #fff8e1; border-color: #f5a623; color: #c47d00; }
     [data-theme="dark"] .btn-detail-bookmark.active { background: #3d2e00; border-color: #f5a623; color: #f5a623; }
+    .toc-btn { background: var(--bg-secondary); border: 0.5px solid var(--border-mid); border-radius: var(--radius-md); padding: 10px 16px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-secondary); font-family: inherit; width: 100%; justify-content: center; transition: all 0.15s; margin-top: 10px; }
+    .toc-btn:hover { background: var(--bg-tertiary); color: var(--text); }
+    .toc-btn.active { background: #1a3a5c; color: #fff; border-color: #1a3a5c; }
+    .toc-screen-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+    .toc-round-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; margin-bottom: 1rem; }
+    .toc-round-btn { background: var(--bg-secondary); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 10px 6px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; color: var(--text); font-family: inherit; transition: all 0.15s; }
+    .toc-round-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+    .toc-round-btn.selected { background: #1a3a5c; color: #fff; border-color: #1a3a5c; }
+    .toc-group-label { font-size: 11px; font-weight: 700; color: var(--text-tertiary); margin: 10px 0 6px; letter-spacing: 0.05em; }
+    .toc-list { display: grid; gap: 4px; }
+    .toc-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: var(--radius-md); cursor: pointer; transition: background 0.15s; border: 0.5px solid transparent; }
+    .toc-item:hover { background: var(--bg-secondary); border-color: var(--border); }
+    .toc-item-num { font-size: 11px; font-weight: 700; color: var(--text-tertiary); min-width: 36px; padding-top: 1px; white-space: nowrap; }
+    .toc-item-q { font-size: 13px; color: var(--text); line-height: 1.5; }
+    .toc-item-subject { font-size: 10px; color: var(--green-mid); background: var(--green-light); padding: 1px 6px; border-radius: 999px; white-space: nowrap; margin-top: 3px; display: inline-block; }
+    .toc-back-btn { font-size: 13px; color: var(--green); cursor: pointer; background: none; border: none; font-family: inherit; display: flex; align-items: center; gap: 4px; padding: 0; }
+    .toc-back-btn:hover { opacity: 0.8; }
     .footer { margin-top: 2rem; padding-top: 1rem; border-top: 0.5px solid var(--border); font-size: 12px; color: var(--text-tertiary); text-align: center; }
   </style>
 </head>
@@ -315,8 +332,13 @@
       <i class="ti ti-circle-check" style="font-size:16px"></i>
       問題データが読み込まれています（<span id="loaded-count"></span>問）
     </div>
-    <div class="section-title">回次別に全問解く</div>
-    <div class="tag-row" id="round-tags"></div>
+    <div style="margin-bottom:1.5rem;">
+      <div class="section-title">回次別に全問解く</div>
+      <div class="tag-row" id="round-tags" style="margin-bottom:8px;"></div>
+      <button class="toc-btn" onclick="showTocScreen()" style="margin-top:0;">
+        📋 問題一覧を見る（科目別表示）
+      </button>
+    </div>
 <div class="section-title">科目を選ぶ（過去10年分・複数選択可）</div>
     <div class="tag-row" id="subject-tags"></div>
     <div class="num-row">
@@ -400,6 +422,29 @@
       </button>
     </div>
   </div>
+  <!-- 問題一覧画面 -->
+  <div id="screen-toc" class="screen hidden">
+    <div class="toc-screen-header">
+      <div style="font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-list-numbers" style="color:var(--green)"></i>
+        <span id="toc-title">回次別 問題一覧</span>
+      </div>
+      <button class="btn-home-sm" onclick="showHome()"><i class="ti ti-home"></i>ホーム</button>
+    </div>
+    <div id="toc-round-select">
+      <div class="toc-group-label">第1〜24回</div>
+      <div class="toc-round-grid" id="toc-grid-extra"></div>
+      <div class="toc-group-label">第25〜34回（過去10年分）</div>
+      <div class="toc-round-grid" id="toc-grid-main"></div>
+    </div>
+    <div id="toc-list-area" class="hidden">
+      <button class="toc-back-btn" onclick="showTocRoundSelect()" style="margin-bottom:1rem;">
+        <i class="ti ti-arrow-left"></i>回次選択に戻る
+      </button>
+      <div id="toc-list" class="toc-list"></div>
+    </div>
+  </div>
+
 <!-- 検索画面 -->
   <div id="screen-search" class="screen hidden">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
@@ -620,6 +665,15 @@
       <button class="icon-btn" onclick="closeChangelog()"><i class="ti ti-x"></i></button>
     </div>
     <div class="modal-body">
+      <div class="changelog-item">
+        <div class="changelog-version">v3.0 <span>2026年</span></div>
+        <ul>
+          <li>回次別 問題一覧機能を追加（科目別カラー蛇腹表示）</li>
+          <li>一覧から問題をタップで詳細モーダル表示・メモ・保存に対応</li>
+          <li>一覧ボタンを回次別フォルダーの直下に配置</li>
+          <li>全チェック通過・スマホ表示最終確認済み</li>
+        </ul>
+      </div>
       <div class="changelog-item">
         <div class="changelog-version">v2.9 <span>2026年</span></div>
         <ul>
@@ -1277,7 +1331,7 @@ let detailSearchRaw = '';
 let detailSearchIdx = 0;
 let currentSearchResults = [];
 
-function showDetail(idx) {
+function showDetail(idx, onStartCallback) {
   const results = currentSearchResults;
   const q = results[idx];
   if (!q) return;
@@ -1409,6 +1463,152 @@ function startFromDetail() {
   renderQuestion();
 }
 
+
+// ===== 問題一覧（TOC）=====
+let tocSelectedRound = null;
+let tocSelectedIsExtra = false;
+
+function showTocScreen() {
+  showScreen('toc');
+  document.getElementById('toc-title').textContent = '回次別 問題一覧';
+  showTocRoundSelect();
+  renderTocRoundGrid();
+}
+
+function renderTocRoundGrid() {
+  // 第1〜24回
+  const extraGrid = document.getElementById('toc-grid-extra');
+  extraGrid.innerHTML = '';
+  for (const r of extraRounds) {
+    const btn = document.createElement('button');
+    btn.className = 'toc-round-btn';
+    btn.textContent = '第' + r + '回';
+    btn.onclick = () => showTocList(r, true);
+    extraGrid.appendChild(btn);
+  }
+  // 第25〜34回
+  const mainGrid = document.getElementById('toc-grid-main');
+  mainGrid.innerHTML = '';
+  for (const r of allRounds) {
+    const btn = document.createElement('button');
+    btn.className = 'toc-round-btn';
+    btn.textContent = '第' + r + '回';
+    btn.onclick = () => showTocList(r, false);
+    mainGrid.appendChild(btn);
+  }
+}
+
+function showTocRoundSelect() {
+  document.getElementById('toc-round-select').classList.remove('hidden');
+  document.getElementById('toc-list-area').classList.add('hidden');
+  document.getElementById('toc-title').textContent = '回次別 問題一覧';
+  // 選択解除
+  document.querySelectorAll('.toc-round-btn').forEach(b => b.classList.remove('selected'));
+}
+
+function showTocList(round, isExtra) {
+  tocSelectedRound = round;
+  tocSelectedIsExtra = isExtra;
+
+  document.querySelectorAll('.toc-round-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent === '第' + round + '回');
+  });
+
+  const src = isExtra ? extraQuestions : questions;
+  const pool = src.filter(q => q.round === round);
+
+  document.getElementById('toc-title').textContent = '第' + round + '回（' + pool.length + '問）';
+  document.getElementById('toc-round-select').classList.add('hidden');
+  document.getElementById('toc-list-area').classList.remove('hidden');
+
+  const list = document.getElementById('toc-list');
+  list.innerHTML = '';
+
+  // 科目ごとにグループ化（出題順を維持）
+  const groups = [];
+  let currentGroup = null;
+  pool.forEach((q, i) => {
+    if (!currentGroup || currentGroup.subject !== q.subject) {
+      currentGroup = { subject: q.subject, color: getSubjectColor(q.subject), items: [], startIdx: i };
+      groups.push(currentGroup);
+    }
+    currentGroup.items.push({ q, globalIdx: i });
+  });
+
+  // 科目別蛇腹で表示
+  groups.forEach((group, gi) => {
+    const foldId = 'toc-fold-' + gi;
+    const contentId = 'toc-content-' + gi;
+
+    // 科目帯ヘッダー
+    const band = document.createElement('div');
+    band.className = 'search-subject-band';
+    band.id = foldId;
+    band.style.background = group.color;
+    band.style.borderRadius = 'var(--radius-md)';
+    band.style.marginTop = gi === 0 ? '0' : '8px';
+    band.innerHTML =
+      '<span class="search-subject-band-name"><i class="ti ti-book-2"></i>' + group.subject + '</span>' +
+      '<span class="search-subject-band-right">' +
+        '<span class="search-subject-band-count">' + group.items.length + '問</span>' +
+        '<i class="ti ti-chevron-right search-subject-band-arrow"></i>' +
+      '</span>';
+    band.onclick = function() { toggleTocGroup(foldId, contentId); };
+    list.appendChild(band);
+
+    // 問題一覧（デフォルト折りたたみ）
+    const content = document.createElement('div');
+    content.className = 'search-subject-content';
+    content.id = contentId;
+
+    group.items.forEach(({ q, globalIdx }) => {
+      const item = document.createElement('div');
+      item.className = 'toc-item';
+      item.innerHTML =
+        '<div class="toc-item-num">問' + (globalIdx + 1) + '</div>' +
+        '<div><div class="toc-item-q">' + q.q + '</div></div>';
+      item.onclick = (function(gIdx) {
+        return function() { showTocDetail(pool, gIdx); };
+      })(globalIdx);
+      content.appendChild(item);
+    });
+
+    list.appendChild(content);
+  });
+
+  // 全問演習ボタン
+  const allBtn = document.createElement('button');
+  allBtn.className = 'btn-bookmark-mode';
+  allBtn.style.marginTop = '12px';
+  allBtn.innerHTML = '<i class="ti ti-player-play"></i>第' + round + '回 全' + pool.length + '問を演習';
+  allBtn.onclick = function() { startFromToc(pool, 0); };
+  list.appendChild(allBtn);
+}
+
+
+function showTocDetail(pool, idx) {
+  currentSearchResults = pool;
+  showDetail(idx, function() { startFromToc(pool, idx); });
+}
+
+function toggleTocGroup(bandId, contentId) {
+  const band = document.getElementById(bandId);
+  const content = document.getElementById(contentId);
+  const isOpen = content.classList.contains('open');
+  content.classList.toggle('open');
+  band.classList.toggle('open');
+  band.style.borderRadius = isOpen ? 'var(--radius-md)' : 'var(--radius-md) var(--radius-md) 0 0';
+}
+
+function startFromToc(pool, startIdx) {
+  // クリックした問題から順番に出題（一覧順を維持）
+  quizSet = [...pool.slice(startIdx), ...pool.slice(0, startIdx)];
+  current = 0; correct = 0; startTime = Date.now();
+  answerHistory = {}; shuffleHistory = {}; clearResume();
+  showScreen('quiz');
+  renderQuestion();
+}
+
 // ===== 中断・再開 =====
 const RESUME_KEY = 'acupuncture_resume';
 
@@ -1496,7 +1696,7 @@ function toggleTheme() {
 }
 
 // ===== 更新履歴モーダル =====
-const APP_VERSION = 'v2.9';
+const APP_VERSION = 'v3.0';
 
 function checkVersionAndShowChangelog() {
   const lastSeen = localStorage.getItem('acupuncture_last_version');
@@ -1916,7 +2116,7 @@ function confirmHome() {
 function showHome() { showScreen('home'); }
 
 function showScreen(name) {
-  ['home','quiz','result','bookmark','search'].forEach(s => document.getElementById('screen-' + s).classList.add('hidden'));
+  ['home','quiz','result','bookmark','search','toc'].forEach(s => document.getElementById('screen-' + s).classList.add('hidden'));
   document.getElementById('screen-' + name).classList.remove('hidden');
 }
 
