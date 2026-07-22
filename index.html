@@ -666,6 +666,16 @@
     </div>
     <div class="modal-body">
       <div class="changelog-item">
+        <div class="changelog-version">v3.1 <span>2026年</span></div>
+        <ul>
+          <li>問題IDシステム（uid）を導入</li>
+          <li>保存した問題をuidのみ保存し出題時に最新CSVから引き当てる方式に変更</li>
+          <li>中断・再開データもuidリストで保存し最新CSVから復元するよう変更</li>
+          <li>旧形式のbookmarksを起動時に自動マイグレーション</li>
+          <li>CSVを更新しても保存した問題・中断データに古い問題が出題されない問題を修正</li>
+        </ul>
+      </div>
+            <div class="changelog-item">
         <div class="changelog-version">v3.0 <span>2026年</span></div>
         <ul>
           <li>回次別 問題一覧機能を追加（科目別カラー蛇腹表示）</li>
@@ -870,11 +880,12 @@ let statsDB = {};
 function init() {
   initTheme();
   updateCountdown();
-  questions = QUIZ_DATA.map(d => ({subject:d.s, q:d.q, choices:d.c, ans:d.a, exp:d.e, round:d.r||'', extra:false}));
-  extraQuestions = EXTRA_DATA.map(d => ({subject:d.s, q:d.q, choices:d.c, ans:d.a, exp:d.e, round:d.r||'', extra:true}));
+  questions = QUIZ_DATA.map((d, i) => ({subject:d.s, q:d.q, choices:d.c, ans:d.a, exp:d.e, round:d.r||'', extra:false, uid:'M'+i}));
+  extraQuestions = EXTRA_DATA.map((d, i) => ({subject:d.s, q:d.q, choices:d.c, ans:d.a, exp:d.e, round:d.r||'', extra:true, uid:'E'+i}));
   loadStatsDB();
   loadBookmarks();
   loadUserNotes();
+  migrateBookmarks(); // 旧bookmarksを新形式に変換
   updateStatsBanner();
   updateWeakDesc();
   updateBookmarkDesc();
@@ -984,7 +995,8 @@ function saveBookmarks() {
 }
 
 function getBookmarkKey(q) {
-  return q.subject + '||' + q.q;
+  // uidがあればuid基準、なければ旧形式（後方互換）
+  return q.uid || (q.subject + '||' + q.q);
 }
 
 function toggleBookmark() {
@@ -993,7 +1005,8 @@ function toggleBookmark() {
   if (bookmarks[key]) {
     delete bookmarks[key];
   } else {
-    bookmarks[key] = { subject: q.subject, q: q.q, choices: q.choices, ans: q.ans, exp: q.exp, round: q.round };
+    // uidと識別情報のみ保存（問題内容は最新CSVから引き当て）
+    bookmarks[key] = { uid: q.uid, subject: q.subject, round: q.round, q: q.q };
   }
   saveBookmarks();
   updateBookmarkBtn();
@@ -1099,10 +1112,8 @@ function toggleFolder(id, btn) {
 function startBookmarkQuiz() {
   const keys = Object.keys(bookmarks);
   if (keys.length === 0) { alert('栞がありません。'); return; }
-  quizSet = sortPoolByPriority(keys.map(k => {
-    const b = bookmarks[k];
-    return { subject: b.subject, q: b.q, choices: b.choices, ans: b.ans, exp: b.exp, round: b.round || '' };
-  }));
+  const resolved = keys.map(k => resolveBookmarkedQuestion(bookmarks[k])).filter(q => q);
+  quizSet = sortPoolByPriority(resolved);
   current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={}; clearResume();
   showScreen('quiz');
   renderQuestion();
@@ -1110,7 +1121,9 @@ function startBookmarkQuiz() {
 
 function reviewBookmark(key) {
   const b = bookmarks[key];
-  quizSet = [{ subject: b.subject, q: b.q, choices: b.choices, ans: b.ans, exp: b.exp, round: b.round || '' }];
+  const resolved = resolveBookmarkedQuestion(b);
+  const q = resolved || b;
+  quizSet = [{ subject: q.subject, q: q.q, choices: q.choices, ans: q.ans, exp: q.exp, round: q.round || '', uid: q.uid }];
   current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={}; clearResume();
   showScreen('quiz');
   renderQuestion();
@@ -1444,7 +1457,7 @@ function toggleDetailBookmark() {
   if (bookmarks[key]) {
     delete bookmarks[key];
   } else {
-    bookmarks[key] = { subject: detailQ.subject, q: detailQ.q, choices: detailQ.choices, ans: detailQ.ans, exp: detailQ.exp, round: detailQ.round };
+    bookmarks[key] = { uid: detailQ.uid, subject: detailQ.subject, round: detailQ.round, q: detailQ.q };
   }
   saveBookmarks();
   updateDetailBookmarkBtn();
@@ -1609,18 +1622,58 @@ function startFromToc(pool, startIdx) {
   renderQuestion();
 }
 
+
+
+// ===== データマイグレーション =====
+function migrateBookmarks() {
+  const allQ = [...questions, ...extraQuestions];
+  let updated = false;
+  for (const key of Object.keys(bookmarks)) {
+    const b = bookmarks[key];
+    if (!b.uid) {
+      // 旧形式: 科目+問題文で検索してuidを付与
+      const found = allQ.find(q => q.subject === b.subject && q.q === b.q);
+      if (found) {
+        // 新キー（uid）で再保存
+        const newKey = found.uid;
+        bookmarks[newKey] = { uid: found.uid, subject: found.subject, round: found.round, q: found.q };
+        delete bookmarks[key];
+        updated = true;
+      }
+    }
+  }
+  if (updated) saveBookmarks();
+}
+
+// ===== ブックマーク解決（最新CSVから引き当て） =====
+function resolveBookmarkedQuestion(b) {
+  // uidで最新データを引き当て
+  if (b.uid) {
+    const allQ = [...questions, ...extraQuestions];
+    const found = allQ.find(q => q.uid === b.uid);
+    if (found) return found;
+  }
+  // uid未対応の旧データ：科目+問題文で検索
+  const allQ = [...questions, ...extraQuestions];
+  const found = allQ.find(q => q.subject === b.subject && q.q === b.q);
+  if (found) return found;
+  // 見つからなければ保存データをそのまま使用（フォールバック）
+  return b.choices ? b : null;
+}
+
 // ===== 中断・再開 =====
 const RESUME_KEY = 'acupuncture_resume';
 
 function saveProgress() {
   if (!quizSet.length) return;
   const data = {
-    quizSet: quizSet,
+    // quizSetはuidリストのみ保存（最新CSVから復元）
+    quizUids: quizSet.map(q => q.uid || null),
+    quizFallback: quizSet.map(q => q.uid ? null : q), // uid未対応の旧データのみフォールバック
     current: current,
     correct: correct,
     startTime: startTime,
     answerHistory: answerHistory,
-    shuffleHistory: shuffleHistory,
     savedAt: Date.now()
   };
   try { localStorage.setItem(RESUME_KEY, JSON.stringify(data)); } catch(e) {}
@@ -1655,12 +1708,29 @@ function checkResume() {
 function resumeQuiz() {
   const data = loadResume();
   if (!data) return;
-  quizSet = data.quizSet;
+
+  // 最新CSVからquizSetを復元
+  if (data.quizUids) {
+    const allQ = [...questions, ...extraQuestions];
+    quizSet = data.quizUids.map((uid, i) => {
+      if (uid) {
+        const found = allQ.find(q => q.uid === uid);
+        if (found) return found;
+      }
+      // フォールバック（uid未対応の旧データ）
+      return data.quizFallback && data.quizFallback[i] ? data.quizFallback[i] : null;
+    }).filter(q => q);
+  } else if (data.quizSet) {
+    // 旧形式の中断データ（後方互換）
+    quizSet = data.quizSet;
+  }
+
+  if (!quizSet.length) { clearResume(); return; }
   current = data.current;
   correct = data.correct;
   startTime = data.startTime || Date.now();
   answerHistory = data.answerHistory || {};
-  shuffleHistory = data.shuffleHistory || {};
+  shuffleHistory = {};
   document.getElementById('resume-banner').classList.add('hidden');
   showScreen('quiz');
   renderQuestion();
@@ -1696,7 +1766,7 @@ function toggleTheme() {
 }
 
 // ===== 更新履歴モーダル =====
-const APP_VERSION = 'v3.0';
+const APP_VERSION = 'v3.1';
 
 function checkVersionAndShowChangelog() {
   const lastSeen = localStorage.getItem('acupuncture_last_version');
