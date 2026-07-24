@@ -666,6 +666,23 @@
     </div>
     <div class="modal-body">
       <div class="changelog-item">
+        <div class="changelog-version">v3.3 <span>2026年</span></div>
+        <ul>
+          <li>中断再開後に正解の選択肢が誤表示されるバグを修正</li>
+          <li>JSON復元時のshuffleHistory・answerHistoryのキーを文字列→数値に変換</li>
+          <li>isCorrectフラグをbool型に保証（JSON復元後の型不一致を解消）</li>
+        </ul>
+      </div>
+            <div class="changelog-item">
+        <div class="changelog-version">v3.2 <span>2026年</span></div>
+        <ul>
+          <li>中断・再開：checkResume()を新形式(quizUids)に対応</li>
+          <li>中断・再開：shuffleHistoryを保存・復元するよう修正</li>
+          <li>再開後の解答復元(restoreAnswer)の安全対策を追加</li>
+          <li>保存ボタン：quizSetが空の場合のnullエラーを修正</li>
+        </ul>
+      </div>
+            <div class="changelog-item">
         <div class="changelog-version">v3.1 <span>2026年</span></div>
         <ul>
           <li>問題IDシステム（uid）を導入</li>
@@ -1001,6 +1018,7 @@ function getBookmarkKey(q) {
 
 function toggleBookmark() {
   const q = quizSet[current];
+  if (!q) return;
   const key = getBookmarkKey(q);
   if (bookmarks[key]) {
     delete bookmarks[key];
@@ -1669,11 +1687,12 @@ function saveProgress() {
   const data = {
     // quizSetはuidリストのみ保存（最新CSVから復元）
     quizUids: quizSet.map(q => q.uid || null),
-    quizFallback: quizSet.map(q => q.uid ? null : q), // uid未対応の旧データのみフォールバック
+    quizFallback: quizSet.map(q => q.uid ? null : q),
     current: current,
     correct: correct,
     startTime: startTime,
     answerHistory: answerHistory,
+    shuffleHistory: shuffleHistory,
     savedAt: Date.now()
   };
   try { localStorage.setItem(RESUME_KEY, JSON.stringify(data)); } catch(e) {}
@@ -1693,15 +1712,31 @@ function clearResume() {
 function checkResume() {
   const data = loadResume();
   const banner = document.getElementById('resume-banner');
-  if (!data || !data.quizSet || !data.quizSet.length) {
-    banner.classList.add('hidden');
-    return;
-  }
-  const remaining = data.quizSet.length - data.current;
+
+  // 新形式(quizUids)・旧形式(quizSet)両対応
+  const hasData = data && (
+    (data.quizUids && data.quizUids.length) ||
+    (data.quizSet && data.quizSet.length)
+  );
+  if (!hasData) { banner.classList.add('hidden'); return; }
+
+  const total = data.quizUids ? data.quizUids.length : data.quizSet.length;
+  const remaining = total - (data.current || 0);
   const elapsed = Math.floor((Date.now() - data.savedAt) / 60000);
   const timeStr = elapsed < 60 ? elapsed + '分前' : Math.floor(elapsed/60) + '時間前';
+
+  // 科目名を取得（新形式はuidから、旧形式はquizSetから）
+  let subjectName = '不明';
+  if (data.quizUids && data.quizUids[0]) {
+    const allQ = [...questions, ...extraQuestions];
+    const found = allQ.find(q => q.uid === data.quizUids[0]);
+    if (found) subjectName = found.subject;
+  } else if (data.quizSet && data.quizSet[0]) {
+    subjectName = data.quizSet[0].subject || '不明';
+  }
+
   document.getElementById('resume-meta').textContent =
-    `${data.quizSet[0].subject}ほか / 残り${remaining}問 / ${timeStr}に中断`;
+    subjectName + 'ほか / 残り' + remaining + '問 / ' + timeStr + 'に中断';
   banner.classList.remove('hidden');
 }
 
@@ -1729,8 +1764,21 @@ function resumeQuiz() {
   current = data.current;
   correct = data.correct;
   startTime = data.startTime || Date.now();
-  answerHistory = data.answerHistory || {};
+  // JSON復元後はキーが文字列になるため数値キーに変換
+  const rawAH = data.answerHistory || {};
+  answerHistory = {};
+  for (const k of Object.keys(rawAH)) {
+    answerHistory[parseInt(k, 10)] = rawAH[k];
+  }
+  // JSON復元後はキーが文字列になるため数値キーに変換、isCorrectをboolに保証
+  const rawSH = data.shuffleHistory || {};
   shuffleHistory = {};
+  for (const k of Object.keys(rawSH)) {
+    shuffleHistory[parseInt(k, 10)] = rawSH[k].map(c => ({
+      text: c.text,
+      isCorrect: c.isCorrect === true || c.isCorrect === 'true'
+    }));
+  }
   document.getElementById('resume-banner').classList.add('hidden');
   showScreen('quiz');
   renderQuestion();
@@ -1766,7 +1814,7 @@ function toggleTheme() {
 }
 
 // ===== 更新履歴モーダル =====
-const APP_VERSION = 'v3.1';
+const APP_VERSION = 'v3.3';
 
 function checkVersionAndShowChangelog() {
   const lastSeen = localStorage.getItem('acupuncture_last_version');
@@ -2120,11 +2168,13 @@ function answer(idx) {
 function restoreAnswer(qIndex) {
   const hist = answerHistory[qIndex];
   if (!hist) return;
+  // shuffleHistoryがない場合は再シャッフルして復元不可なのでスキップ
+  if (!shuffledChoices || !shuffledChoices.length) return;
   answered = true;
   const btns = document.querySelectorAll('.choice-btn');
   btns.forEach((b, i) => {
     b.disabled = true;
-    if (shuffledChoices[i].isCorrect) b.classList.add('correct');
+    if (shuffledChoices[i] && shuffledChoices[i].isCorrect) b.classList.add('correct');
     else if (i === hist.idx) b.classList.add('wrong');
   });
   showExplanation(quizSet[qIndex], hist.isCorrect, hist.correctLabel);
