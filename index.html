@@ -666,6 +666,14 @@
     </div>
     <div class="modal-body">
       <div class="changelog-item">
+        <div class="changelog-version">v4.1 <span>2026年</span></div>
+        <ul>
+          <li>異なる回次の同名問題に同じメモが表示されるバグを修正</li>
+          <li>メモ・統計のキーをuid基準（科目+回次+問題文）に変更</li>
+          <li>旧形式のメモキーを自動マイグレーション</li>
+        </ul>
+      </div>
+            <div class="changelog-item">
         <div class="changelog-version">v4.0 <span>2026年</span></div>
         <ul>
           <li>問題データ更新（第25〜34回）</li>
@@ -772,6 +780,7 @@ function init() {
   loadBookmarks();
   loadUserNotes();
   migrateBookmarks(); // 旧bookmarksを新形式に変換
+  migrateNotes();      // 旧メモキーを新形式に変換
   updateStatsBanner();
   updateWeakDesc();
   updateBookmarkDesc();
@@ -1519,6 +1528,33 @@ function startFromToc(pool, startIdx) {
 
 
 // ===== データマイグレーション =====
+
+// ===== メモのマイグレーション（旧キー→新キー） =====
+function migrateNotes() {
+  const allQ = [...questions, ...extraQuestions];
+  let updated = false;
+  for (const key of Object.keys(userNotes)) {
+    // 旧キー形式（科目||問題文）かチェック（新形式はuid or 科目||回次||問題文）
+    const parts = key.split('||');
+    if (parts.length === 2) {
+      // 旧形式：科目||問題文 → uidで一致する問題を探す
+      const [subj, qText] = parts;
+      const matches = allQ.filter(q => q.subject === subj && q.q === qText);
+      if (matches.length === 1) {
+        // 1問だけ一致 → 新キーで移行
+        const newKey = getNoteKey(matches[0]);
+        if (newKey !== key) {
+          userNotes[newKey] = userNotes[key];
+          delete userNotes[key];
+          updated = true;
+        }
+      }
+      // 複数一致の場合は曖昧なので移行しない（旧キーのままにして共有を許容）
+    }
+  }
+  if (updated) saveUserNotes();
+}
+
 function migrateBookmarks() {
   const allQ = [...questions, ...extraQuestions];
   let updated = false;
@@ -1690,7 +1726,7 @@ function toggleTheme() {
 }
 
 // ===== 更新履歴モーダル =====
-const APP_VERSION = 'v4.0';
+const APP_VERSION = 'v4.1';
 
 function checkVersionAndShowChangelog() {
   const lastSeen = localStorage.getItem('acupuncture_last_version');
@@ -1738,7 +1774,8 @@ function saveUserNotes() {
 }
 
 function getNoteKey(q) {
-  return q.subject + '||' + q.q;
+  // uidがあればuid基準（最も確実）、なければ科目+回次+問題文で識別
+  return q.uid || (q.subject + '||' + (q.round || '') + '||' + q.q);
 }
 
 function showExplanation(q, isCorrect, correctLabel) {
@@ -1839,7 +1876,8 @@ function saveStatsDB() {
 }
 
 function getStatKey(q) {
-  return q.subject + '||' + q.q;
+  // uidがあればuid基準、なければ科目+回次+問題文で識別
+  return q.uid || (q.subject + '||' + (q.round || '') + '||' + q.q);
 }
 
 function recordStat(q, isCorrect) {
