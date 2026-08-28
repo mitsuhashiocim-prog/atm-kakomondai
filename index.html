@@ -161,6 +161,9 @@
     .btn-exp-clear:hover { background: var(--bg-secondary); }
     .exp-saved-badge { font-size: 11px; color: var(--green); display: flex; align-items: center; gap: 3px; }
     .note-indicator { font-size: 11px; color: var(--green); margin-left: 6px; }
+    .result-session-info { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 10px 16px; margin-bottom: 1rem; font-size: 12px; color: var(--text-secondary); line-height: 1.8; }
+    .result-session-info .session-date { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .result-session-info .session-mode { color: var(--green); font-weight: 600; }
     .result-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 2.5rem; text-align: center; margin-bottom: 1.5rem; }
     .result-score { font-size: 56px; font-weight: 700; color: var(--green); line-height: 1; }
     .result-label { font-size: 14px; color: var(--text-secondary); margin-top: 8px; }
@@ -467,6 +470,7 @@
     <div id="bookmark-list-container"></div>
   </div>
 <div id="screen-result" class="screen hidden">
+    <div id="res-session-info" style="font-size:12px;color:var(--text-tertiary);margin-bottom:1rem;padding:10px 14px;background:var(--bg-secondary);border-radius:var(--radius-md);line-height:1.8;"></div>
     <div class="result-card">
       <div class="result-score" id="res-score"></div>
       <div class="result-label">正解率</div>
@@ -666,6 +670,12 @@
     </div>
     <div class="modal-body">
       <div class="changelog-item">
+        <div class="changelog-version">v4.5 <span>2026年</span></div>
+        <ul>
+          <li>結果画面に演習日付と実施モードを表示（例：2026年8月27日 / 本番モード180問）</li>
+        </ul>
+      </div>
+            <div class="changelog-item">
         <div class="changelog-version">v4.4 <span>2026年</span></div>
         <ul>
           <li>問題データ修正（第29回・解剖学）</li>
@@ -788,6 +798,7 @@ let selectedSubjects=new Set(), allSubjects=[];
 let selectedRounds=new Set(), allRounds=[], extraRounds=[];
 let totalAttempts=0, totalCorrect=0;
 let shuffledChoices=[], startTime=0;
+let quizMode = ''; // 演習モードの説明
 let answerHistory={}, shuffleHistory={};
 let statsDB = {};
 
@@ -1030,7 +1041,9 @@ function startBookmarkQuiz() {
   if (keys.length === 0) { alert('栞がありません。'); return; }
   const resolved = keys.map(k => resolveBookmarkedQuestion(bookmarks[k])).filter(q => q);
   quizSet = sortPoolByPriority(resolved);
+  quizMode = '保存した問題 ' + quizSet.length + '問';
   current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={}; clearResume();
+  quizMode = '保存した問題 ' + quizSet.length + '問';
   showScreen('quiz');
   renderQuestion();
 }
@@ -1394,6 +1407,7 @@ function startFromDetail() {
   quizSet = [detailQ, ...rest];
   current = 0; correct = 0; startTime = Date.now();
   answerHistory = {}; shuffleHistory = {};
+  quizMode = '検索結果 ' + quizSet.length + '問';
   closeDetail();
   showScreen('quiz');
   renderQuestion();
@@ -1454,6 +1468,7 @@ function showTocList(round, isExtra) {
   const pool = src.filter(q => q.round === round);
 
   document.getElementById('toc-title').textContent = '第' + round + '回（' + pool.length + '問）';
+  quizMode = '第' + round + '回 問題一覧（' + pool.length + '問）';
   document.getElementById('toc-round-select').classList.add('hidden');
   document.getElementById('toc-list-area').classList.remove('hidden');
 
@@ -1539,8 +1554,10 @@ function toggleTocGroup(bandId, contentId) {
 function startFromToc(pool, startIdx) {
   if (!pool || !pool.length) { alert('問題が見つかりません。'); return; }
   quizSet = [...pool.slice(startIdx), ...pool.slice(0, startIdx)];
+  quizMode = '第' + (pool[0] ? pool[0].round : '') + '回 問題一覧（' + pool.length + '問）';
   current = 0; correct = 0; startTime = Date.now();
   answerHistory = {}; shuffleHistory = {}; clearResume();
+
   showScreen('quiz');
   renderQuestion();
 }
@@ -1711,6 +1728,7 @@ function resumeQuiz() {
       isCorrect: c.isCorrect === true || c.isCorrect === 'true'
     }));
   }
+  quizMode = '中断から再開 ' + quizSet.length + '問';
   document.getElementById('resume-banner').classList.add('hidden');
   showScreen('quiz');
   renderQuestion();
@@ -1746,7 +1764,7 @@ function toggleTheme() {
 }
 
 // ===== 更新履歴モーダル =====
-const APP_VERSION = 'v4.4';
+const APP_VERSION = 'v4.5';
 
 function checkVersionAndShowChangelog() {
   const lastSeen = localStorage.getItem('acupuncture_last_version');
@@ -1979,6 +1997,7 @@ function startWeakMode() {
   });
   if (weak.length === 0) { alert('まだ苦手問題がありません。\n演習を重ねると自動的に抽出されます。'); return; }
   quizSet = sortPoolByPriority(weak);
+  quizMode = '苦手問題モード ' + weak.length + '問';
   current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={}; clearResume();
   showScreen('quiz');
   renderQuestion();
@@ -1988,7 +2007,8 @@ function startRoundMode(round, isExtra) {
   const src = isExtra ? extraQuestions : questions;
   const pool = src.filter(q => q.round === round);
   if (!pool.length) { alert('該当する問題が見つかりません。'); return; }
-  quizSet = pool; // CSV順をそのまま使用・シャッフルなし
+  quizSet = pool;
+  quizMode = '第' + round + '回 全' + pool.length + '問（出題順）';
   current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={}; clearResume();
   showScreen('quiz');
   renderQuestion();
@@ -2018,7 +2038,8 @@ function startExamMode() {
     pool = pool.concat(picked);
   }
   if (!pool.length) { alert('問題データが不足しています。'); return; }
-  quizSet = pool; // 科目順を維持・各科目内は初挑戦優先
+  quizSet = pool;
+  quizMode = '本番モード 180問（過去10年分・国試配分）';
   current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={}; clearResume();
   showScreen('quiz');
   renderQuestion();
@@ -2030,6 +2051,8 @@ function startQuiz() {
   const n = parseInt(document.getElementById('num-q').value);
   quizSet = sortPoolByPriority(pool).slice(0, Math.min(n, pool.length));
   current = 0; correct = 0; startTime = Date.now(); answerHistory={}; shuffleHistory={}; clearResume();
+  const subjNames = [...selectedSubjects].join('・');
+  quizMode = (selectedSubjects.size === allSubjects.length ? '全科目' : subjNames) + ' ' + quizSet.length + '問（ランダム）';
   showScreen('quiz');
   renderQuestion();
 }
@@ -2151,6 +2174,17 @@ function showResult() {
   document.getElementById('res-wrong').textContent = quizSet.length - correct;
   document.getElementById('res-total').textContent = quizSet.length;
   document.getElementById('res-time').textContent = mm + ':' + ss;
+
+  // セッション情報を表示
+  const now = new Date();
+  const dow = ['日','月','火','水','木','金','土'][now.getDay()];
+  const dateStr = now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日（' + dow + '）';
+  const info = document.getElementById('res-session-info');
+  if (info) {
+    info.innerHTML =
+      '<span style="font-weight:600;color:var(--text);">📅 ' + dateStr + '</span><br>' +
+      '📝 ' + (quizMode || '演習');
+  }
   const grades = [[90,'優秀！合格圏内です'],[70,'良好。あと少しで合格ラインです'],[50,'もう少し頑張りましょう'],[0,'基礎から見直しましょう']];
   document.getElementById('res-grade').textContent = grades.find(([t]) => pct >= t)[1];
   document.getElementById('progress-bar').style.width = '100%';
