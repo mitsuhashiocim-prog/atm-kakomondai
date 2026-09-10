@@ -479,7 +479,7 @@
     <div class="stats-grid">
       <div class="stat-card"><div class="val" id="res-correct"></div><div class="lbl">正解</div></div>
       <div class="stat-card"><div class="val" id="res-wrong"></div><div class="lbl">不正解</div></div>
-      <div class="stat-card"><div class="val" id="res-total"></div><div class="lbl">合計問題数</div></div>
+      <div class="stat-card"><div class="val" id="res-total"></div><div class="lbl">解答した問題</div></div>
     </div>
     <div class="stats-grid" style="grid-template-columns:1fr;">
       <div class="stat-card"><div class="val" id="res-time"></div><div class="lbl">かかった時間</div></div>
@@ -670,6 +670,10 @@
     </div>
     <div class="modal-body">
       <div class="changelog-item">
+<div class="changelog-version">v4.6 <span>2026年</span></div>
+<ul><li>解答状況の表示を分かりやすく改善：進捗は「◯問目 ／ 全◯問」、統計は「延べ解答◯回」「初回解答◯ ／ 全◯問」、結果は「正解◯問・不正解◯問・解答◯問」に変更</li></ul>
+</div>
+<div class="changelog-item">
         <div class="changelog-version">v4.5 <span>2026年</span></div>
         <ul>
           <li>結果画面に演習日付と実施モードを表示（例：2026年8月27日 / 本番モード180問）</li>
@@ -1764,7 +1768,7 @@ function toggleTheme() {
 }
 
 // ===== 更新履歴モーダル =====
-const APP_VERSION = 'v4.5';
+const APP_VERSION = 'v4.6';
 
 function checkVersionAndShowChangelog() {
   const lastSeen = localStorage.getItem('acupuncture_last_version');
@@ -1961,7 +1965,7 @@ function updateStatsBanner() {
   const weak = keys.filter(k => statsDB[k].total > 0 && statsDB[k].correct/statsDB[k].total < 0.5).length;
   const banner = document.getElementById('stats-banner');
   banner.classList.remove('hidden');
-  banner.innerHTML = `<span>累計回答 <b>${total}</b>問</span><span>正解率 <b>${total>0?Math.round(correct/total*100):0}%</b></span><span>苦手問題 <b>${weak}</b>問</span>`;
+  banner.innerHTML = `<span>延べ解答 <b>${total}</b>回</span><span>正解率 <b>${total>0?Math.round(correct/total*100):0}%</b></span><span>苦手問題 <b>${weak}</b>問</span>`;
 
   // 進捗バナー（過去10年分の網羅率）
   const mainTotal = questions.length;
@@ -1971,8 +1975,8 @@ function updateStatsBanner() {
   pb.classList.remove('hidden');
   pb.innerHTML = `
     <div class="progress-banner-row">
-      <span class="progress-banner-label">📊 過去10年分の網羅率</span>
-      <span class="progress-banner-val">${attempted} / ${mainTotal}問 (${pct}%)</span>
+      <span class="progress-banner-label">📊 初回解答した問題</span>
+      <span class="progress-banner-val">${attempted} ／ 全${mainTotal}問 (${pct}%)</span>
     </div>
     <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${pct}%"></div></div>`;
 }
@@ -2070,7 +2074,7 @@ function renderQuestion() {
   const q = quizSet[current];
   const total = quizSet.length;
   document.getElementById('progress-bar').style.width = ((current / total) * 100) + '%';
-  document.getElementById('q-num').textContent = (current + 1) + ' / ' + total;
+  document.getElementById('q-num').textContent = (current + 1) + '問目 ／ 全' + total + '問';
   document.getElementById('q-round').textContent = q.round ? '第'+q.round+'回' : '';
   document.getElementById('q-subject').textContent = q.subject;
   renderDifficulty(q);
@@ -2170,9 +2174,9 @@ function showResult() {
   const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
   const ss = String(elapsed % 60).padStart(2, '0');
   document.getElementById('res-score').textContent = pct + '%';
-  document.getElementById('res-correct').textContent = correct;
-  document.getElementById('res-wrong').textContent = quizSet.length - correct;
-  document.getElementById('res-total').textContent = quizSet.length;
+  document.getElementById('res-correct').textContent = correct + '問';
+  document.getElementById('res-wrong').textContent = (quizSet.length - correct) + '問';
+  document.getElementById('res-total').textContent = quizSet.length + '問';
   document.getElementById('res-time').textContent = mm + ':' + ss;
 
   // セッション情報を表示
@@ -2231,5 +2235,6 @@ function updatePresetBtns(val) {
 
 init();
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
